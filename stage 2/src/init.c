@@ -64,11 +64,14 @@ void cleanup()
 
 extern int no_of_suns;
 extern sun *sun_list;
+extern int active_sun_colors[NO_OF_COLORS / 2];
 
 void initLevel() {
-	/* first level will have 6 suns arranged in a hexagon with one sun controlled by player, one sun controlled by each of two computer opponents and 3 GRAY suns. vacant and occupied suns will be alternately placed */
 	sun *s;
-	
+	int i;
+	for(i = 0; i < NO_OF_COLORS / 2; i++) {
+		active_sun_colors[i] = 0;
+	}
 	/* first sun */
 	s = (sun *)malloc(sizeof(sun));
 	s->color = BLUE;

@@ -1,3 +1,6 @@
+#ifndef FUNCTIONS
+#define FUNCTIONS
+
 int distance2(int x1, int y1, int x2, int y2);
 sun *weakest_nearby_sun(float x, float y, int friendly_color);
 sun *nearest_empty_sun(int x, int y);
@@ -11,3 +14,5 @@ void generate_dots(sun *s);
 void move_to_annulus(dot *d);
 void update_flock_count(sun *s);
 int my_random();
+
+#endif

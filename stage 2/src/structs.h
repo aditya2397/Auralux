@@ -69,4 +69,6 @@ dot *dot_ptr_grid[SCREEN_HEIGHT / GRID_ROW_WIDTH][SCREEN_WIDTH / GRID_COL_WIDTH]
 /* if you try to allocate it dynamically, it will be a dot ****. so allocate it statically */
 /* a little memory is wasted, but it ensures simplicity	*/
 
+int active_sun_colors[NO_OF_COLORS / 2];
+
 #endif

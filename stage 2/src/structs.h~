@@ -41,6 +41,7 @@ typedef struct sun {
 	void (*generate_dots)(); /* write this function and fill in parameters later */
 	struct sun *next;
 	SDL_Surface *sprite;
+	SDL_Surface *bar_small;
 }sun;
 
 typedef struct dot {
@@ -55,7 +56,6 @@ typedef struct dot {
 	void (*move_dot)(struct dot *); /* this points to move_dot() */
 	struct dot *next;
 	SDL_Surface *sprite;
-	SDL_Surface *bar_small;
 }dot;
 
 int no_of_suns; /* set after level is selected and before suns are malloced and initialised  */
@@ -68,5 +68,7 @@ dot *dot_ptr_grid[SCREEN_HEIGHT / GRID_ROW_WIDTH][SCREEN_WIDTH / GRID_COL_WIDTH]
 /* 2d grid, each a[x][y] containing an array of dot pointers of size = number of possible dot colors */
 /* if you try to allocate it dynamically, it will be a dot ****. so allocate it statically */
 /* a little memory is wasted, but it ensures simplicity	*/
+
+int active_sun_colors[NO_OF_COLORS / 2];
 
 #endif
