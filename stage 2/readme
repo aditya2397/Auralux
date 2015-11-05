@@ -1,3 +1,0 @@
-we have made each cpu dot try to protect its home sun (when sun health is < MAX_HEALTH, heal home sun)
-
-next : make cpu dots protect non-home suns of their color. only the dots close enough (define value) should respond, not all
