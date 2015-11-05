@@ -1,0 +1,30 @@
+goals:
+remove dots when there are no more suns of that color -> done
+use config.txt files for initialisation of levels -> done
+use graph theory to make CPU suns attack, attack only suns which are adjacent -> done
+make the dots redistribute themselves around the sun evenly, maybe by calling move_to_annulus() repeatedly after a certain interval -> done
+change cpu logic from "based on health" to "based on flock count" -> done
+create new images for new sun curr_level's (pixel size - level 3 sun is 100 * 100, 2 is 80 * 80, 1 is 60 * 60) -> done
+
+use keys 1-9 for player to decide what fraction of his forces to send to another sun. 1 means all. 2 means 1/2. 3 means 1/3. and so on.
+figure out why top_left to bottom_right motion of dots is faster than top_right to bottom_left
+create at least 2 more levels
+
+
+cpu preferences: -> DONE
+heal yourself -> done
+balance flock counts of friendlies (flock count greater than fixed amount and greater than no_of_adjacent_enemy_suns * some constant) -> done
+heal friendlies (same as heal yourself and balance flock counts of friendlies, so done) 
+attack GRAY-type suns -> done
+upgrade yourself -> done
+upgrade friendlies (same as upgrade yourself, so done)
+attack enemy color suns -> done (upgrade logic a bit to find weakest sun) -> done
+
+plot 't1' u 1:2 with linespoints, 't1' u 1:3 with linespoints, 't1' u 1:4 with linespoints
+
+set style line 1 lt 1 lw 3 pt 3 lc rgb "red"
+set style line 2 lt 3 lw 3 pt 3 lc rgb "red"
+set style line 3 lt 1 lw 3 pt 3 lc rgb "blue"
+set style line 4 lt 3 lw 3 pt 3 lc rgb "blue"
+
+plot sin(x) w l ls 1, x w l ls 2, x**2 w l ls 3, x**3 w l ls 4

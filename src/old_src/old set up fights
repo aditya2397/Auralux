@@ -1,0 +1,44 @@
+	/* set up dot fights */
+	for(i = 0; i < SCREEN_HEIGHT / GRID_ROW_WIDTH; i++) {
+		for(j = 0; j < SCREEN_WIDTH / GRID_COL_WIDTH; j++) {
+			for(k = 0; k < NO_OF_COLORS / 2 - 1; k++) {
+				p = dot_ptr_grid[i][j][k];
+				while(p) {
+					if(p->target_dot) {
+						p = p->next;
+						continue;
+					}
+					/* dot has no dot_target, so it is itching to fight */
+					for(l = k + 1; l < NO_OF_COLORS / 2; l++) {
+						p->target_dot = dot_ptr_grid[i][j][l];
+						while(p->target_dot) {
+							if(!p->target_dot->target_dot) {
+								p->target_dot->target_dot = p;
+								printf("fight arranged\n");
+								break;
+							}
+							p->target_dot = p->target_dot->next;
+						}
+						if(p->target_dot) { /* in natural cases, this will be NULL */
+							break;
+						}
+					}
+					if(l >= NO_OF_COLORS / 2) { /* no enemy pairs left */
+						p->target_dot = NULL;
+						break;
+					}
+					p = p->next;
+				}
+				if(p) { /* if above loop ended unnaturally, i.e. without passing all dots of that color, then it means no enemy pairs left */
+					break;
+				}
+			}
+			if(p) {
+				break;
+			}
+		}
+		if(p) {
+			break;
+		}
+	}	
+
