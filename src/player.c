@@ -1,3 +1,20 @@
+/*  Auralux game
+    Copyright (C) 2015 Aditya Barve
+    
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "player.h"
 #include "defs.h"
 
@@ -20,79 +37,62 @@ void doPlayer()
 		(input.mouse_down_y >= 0) &&
 		(input.mouse_up_x >= 0) &&
 		(input.mouse_up_x >= 0)
-	) {
-		/* this means mouse was pressed and also released */
-			if(distance2(input.mouse_down_x, input.mouse_down_y, input.mouse_up_x, input.mouse_up_y) <= MAX_CLICK_DIST2) {
-				/* mouse motion was a click */
-				if(!initial_sun) {
-					/*
-					printf("taking initial sun\n");
-					*/
-					/* initial sun being selected, can be any sun */
-					s = sun_list;
-					while(s) {
-						if(distance2(input.mouse_down_x, input.mouse_down_y, s->x, s->y) <= (ANNULUS_INNER_RADIUS * ANNULUS_INNER_RADIUS)) {
-							initial_sun = s;
-							break;
-						}
-						s = s->next;
+	) { /* this means mouse was pressed and also released */
+		if(distance2(input.mouse_down_x, input.mouse_down_y, input.mouse_up_x, input.mouse_up_y) <= MAX_CLICK_DIST2) {
+			/* mouse motion was a click */
+			if(!initial_sun) {
+				/* initial sun being selected */
+				s = sun_list;
+				while(s) {
+					if(distance2(input.mouse_down_x, input.mouse_down_y, s->x, s->y) <= (SUN_LEVEL3_RADIUS * SUN_LEVEL3_RADIUS)) {
+						initial_sun = s;
+						break;
 					}
-					/*
-					printf("inital sun : %p\n", (void *)initial_sun);
-					*/
-					if(initial_sun) {
-						select_ring.x = initial_sun->x;
-						select_ring.y = initial_sun->y;
-						select_ring.target_sun = NULL;
-						select_ring.active = 1;
-					}
+					s = s->next;
 				}
-				else {
-					/*
-					printf("taking final sun\n");
-					*/
-					/* final sun being selected, can be any sun */
-					s = sun_list;
-					while(s) {
-						if(distance2(input.mouse_down_x, input.mouse_down_y, s->x, s->y) <= (ANNULUS_INNER_RADIUS * ANNULUS_INNER_RADIUS)) {
-							final_sun = s;
-							break;
-						}
-						s = s->next;
-					}
-					if(!final_sun) {
-						/* initial_sun = NULL; */
-						return;
-					}
-					select_ring.target_sun = final_sun;
-					/*
-					printf("final sun : %p\n", (void *)final_sun);
-					printf("telling dots the new target\n");
-					*/
-					for(i = 0; i < SCREEN_HEIGHT / GRID_ROW_WIDTH; i++) {
-						for(j = 0; j < SCREEN_WIDTH / GRID_COL_WIDTH; j++) {
-							d = dot_ptr_grid[i][j][BLUE / 2];
-							while(d) {
-								if(d->target_sun == initial_sun) {
-									/* printf("target changed\n"); */
-									d->target_sun = final_sun;
-									d->target_x = final_sun->x;
-									d->target_y = final_sun->y;
-									d->reached_sun = 0;
-									d->move_dot = move_dot;
-								}
-								d = d->next;
-							}
-						}
-					}
-					initial_sun = NULL;
-					final_sun = NULL;
+				if(initial_sun) {
+					select_ring.x = initial_sun->x;
+					select_ring.y = initial_sun->y;
+					select_ring.target_sun = NULL;
+					select_ring.active = 1;
 				}
-				clearInput();
 			}
 			else {
-				/* mouse motion was a drag */
-				return;
+				/* final sun being selected */
+				s = sun_list;
+				while(s) {
+					if(distance2(input.mouse_down_x, input.mouse_down_y, s->x, s->y) <= (SUN_LEVEL3_RADIUS * SUN_LEVEL3_RADIUS)) {
+						final_sun = s;
+						break;
+					}
+					s = s->next;
+				}
+				if(!final_sun) {
+					return;
+				}
+				select_ring.target_sun = final_sun;
+				for(i = 0; i < SCREEN_HEIGHT / GRID_ROW_WIDTH; i++) {
+					for(j = 0; j < SCREEN_WIDTH / GRID_COL_WIDTH; j++) {
+						d = dot_ptr_grid[i][j][BLUE / 2];
+						while(d) {
+							if(d->target_sun == initial_sun) {
+								d->target_sun = final_sun;
+								d->target_x = final_sun->x;
+								d->target_y = final_sun->y;
+								d->reached_sun = 0;
+								d->move_dot = move_dot;
+							}
+							d = d->next;
+						}
+					}
+				}
+				initial_sun = NULL;
+				final_sun = NULL;
 			}
+			clearInput();
+		}
+		else { /* mouse motion was a drag */
+			return;
+		}
 	}
 }

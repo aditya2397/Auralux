@@ -1,6 +1,21 @@
-#include "entity.h"
+/*  Auralux game
+    Copyright (C) 2015 Aditya Barve
+    
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-extern void drawImage(SDL_Surface *, int, int);
+#include "entity.h"
 
 extern sun *sun_list;
 extern dot *dot_ptr_grid[SCREEN_HEIGHT / GRID_ROW_WIDTH][SCREEN_WIDTH / GRID_COL_WIDTH][NO_OF_COLORS / 2];
@@ -11,40 +26,14 @@ extern SDL_Surface *getSprite(int);
 extern int distance2(int, int, int, int);
 
 unsigned int no_of_dots[NO_OF_COLORS / 2];
+extern Game game;
 
-void initEntities()
-{
-/*
-	int i, j;
-	sun_ptr_array = (sun **)calloc(NO_OF_COLORS, sizeof(sun *));
-	dot_ptr_grid = (dot ***)malloc(SCREEN_HEIGHT / GRID_ROW_WIDTH * sizeof(dot **));
-	for(i = 0; i < SCREEN_HEIGHT / GRID_ROW_WIDTH; i++) {
-		dot_ptr_grid[i] = (dot **)malloc(SCREEN_WIDTH / GRID_COL_WIDTH * sizeof(dot *));
-		for(j = 0; j < SCREEN_WIDTH / GRID_COL_WIDTH; j++) {
-			dot_ptr_grid[i][j] = (dot *)calloc((NO_OF_COLORS / 2), sizeof(dot *));
-		}
-	}
-*/
-}
-
-void doEntities(int step)
-{
+void doEntities(int step) {
 	int i, j, k;
-	dot *p, *q; /* *r, *s;  4 pointers because 4 possible dot colors */
+	dot *p, *q;
 	dot *temp; /* use to shift dots to new grid boxes */
 	sun *s;
-	/*
-	printf("do entities in\n");
-	for(i = 0; i < NO_OF_COLORS / 2; i++) {
-		printf("%d : %d\n", i, active_sun_colors[i]);
-	}
-	*/
-	
-	/* move select_ring, if active and has a target sun */
-	/*
-	printf("target sun : %p\n", (void *)select_ring.target_sun);
-	*/
-	if(select_ring.active && select_ring.target_sun) {
+	if(select_ring.active && select_ring.target_sun) { /* move select_ring, if active and has a target sun */
 		int sqdist = sqrt(distance2(select_ring.x, select_ring.y, select_ring.target_sun->x, select_ring.target_sun->y));
 		int shift_x, shift_y;
 		if(sqdist <= RING_REASONABLY_CLOSE) {
@@ -54,8 +43,6 @@ void doEntities(int step)
 		else {
 			shift_x = (select_ring.target_sun->x - select_ring.x) * SELECT_RING_SPEED / sqdist;
 			shift_y = (select_ring.target_sun->y - select_ring.y) * SELECT_RING_SPEED / sqdist;
-			/*printf("sun x & y : %d : %d\nring x & y : %d : %d\nshift x & y : %d : %d\n", select_ring.target_sun->x, select_ring.target_sun->y, select_ring.x, select_ring.y, shift_x, shift_y);
-			*/
 			select_ring.x += shift_x;
 			select_ring.y += shift_y;
 		}
@@ -86,9 +73,6 @@ void doEntities(int step)
 						q->target_dot = p;
 						p = p->next;
 						q = q->next;
-						/*
-						printf("targets assigned\n");
-						*/
 					}
 				}
 			}
@@ -96,17 +80,10 @@ void doEntities(int step)
 	}
 	/* reset flock counts */
 	s = sun_list;
-	/* printf("%d BLUE %d s : %p\n", BLUE, i, (void *)s); */
 	while(s) {
-		/*
-		printf("flock count : %d\n", s->flock_count);
-		*/
 		s->flock_count = 0;
 		s = s->next;
 	}
-	/*
-	printf("flock counts reset\n");
-	*/
 	for(i = 0; i < SCREEN_HEIGHT / GRID_ROW_WIDTH; i++) {
 		for(j = 0; j < SCREEN_WIDTH / GRID_COL_WIDTH; j++) {
 			for(k = 0; k < NO_OF_COLORS / 2; k++) {
@@ -128,11 +105,7 @@ void doEntities(int step)
 				}
 				q = NULL;
 				while(p) {
-					/* remove inactive dots */
-					if(!p->active || !active_sun_colors[p->color / 2]) {
-						/*
-						printf("%p\n", (void *)p);
-						*/
+					if(!p->active || !active_sun_colors[p->color / 2]) { /* remove inactive dots */
 						if(q) {
 							q->next = p->next;
 							no_of_dots[p->color / 2]--;
@@ -145,23 +118,17 @@ void doEntities(int step)
 							free(p);
 							p = dot_ptr_grid[i][j][k];
 						}
-						/*
-						printf("exit remove dot code\n");
-						*/
 					}
 					else {
-						/*
-						printf("dot is active\n");
-						*/
-						/* move dot */
-						p->move_dot(p);
+						p->move_dot(p); /* move dots */
 						/* update flock counts */
-						if(p->color == p->target_sun->color || p->color + 1 == p->target_sun->color)
+						if(((p->color + 1) >> 1) == ((p->target_sun->color + 1) >> 1)) {
 							p->target_sun->flock_count++;
-						else
+						}
+						else {
 							p->target_sun->flock_count--;
-						/* put dot in correct grid box */
-						if(
+						}
+						if( /* put dot in correct grid box */
 							(p->y < i * GRID_ROW_WIDTH) ||
 							(p->y >= (i + 1) * GRID_ROW_WIDTH) ||
 							(p->x < j * GRID_COL_WIDTH) ||
@@ -190,144 +157,182 @@ void doEntities(int step)
 			}
 		}
 	}
-	/*
-	printf("dots moved and flock counts updated\n");
-	*/
-	/* PRINTING STATS OF EACH SUN
-	s = sun_list;
-	printf("index\tc_l\tm_l\tnear_en\tflock\tmin_en_dis\n");
-	while(s) {
-		printf("%d\t%d\t%d\t%d\t%d\t%d\n", s->graph_index, s->curr_level, s->max_level, s->nearby_enemies, s->flock_count, s->min_enemy_dist);
-		s = s->next;
-	}
-	*/
-
-	if(step % (100 / MIN_TICK_DELAY) == 0) {
+	if(step % ((1000 / MIN_TICK_DELAY) / UNIT_DOT_PRODUCTION_RATE) == 0) {
 		/* generate dots */
 		s = sun_list;
 		while(s) {
-			/*
-			printf("%d health : %d\n", s->color, s->health);
-			printf("%d upgrade : %d\n", s->color, s->upgrade);
-			*/
 			if(s->color % 2) { /* non_gray color suns generate dots */
 				generate_dots(s);
 			}
 			s = s->next;
 		}
-		/*
-		printf("dots generated\n");
-		*/
 	}
-	/*
-	printf("do entities out\n");
-	*/
 }
 
-extern Sprite sprite[MAX_SPRITES];
 
-void drawEntities()
-{
+void drawEntities() {
 	int i, j, k;
 	dot *d;
-	sun *s;
-	/*
-	printf("draw entities in\n");
-	*/
+	sun *s;	
 	
+	/* Draw select_ring if active */
+	if(select_ring.active) {
+		filledEllipseRGBA(game.screen, 
+			select_ring.x, 
+			select_ring.y, 
+			1.5 * SUN_LEVEL3_RADIUS, 
+			1.5 * SUN_LEVEL3_RADIUS, 
+			255, 
+			255, 
+			255, 
+			255);
+		filledEllipseRGBA(game.screen, 
+			select_ring.x, 
+			select_ring.y, 
+			1.4 * SUN_LEVEL3_RADIUS, 
+			1.4 * SUN_LEVEL3_RADIUS, 
+			0, 
+			0, 
+			0, 
+			255);
+	}
 	/* Draw all suns */
 	s = sun_list;
 	while(s) {
-		if(s->color % 2) {
-			switch(s->curr_level) {
-				case 1:
-					drawImage(s->sprite, s->x - 60 / 2, s->y - 60 / 2);
-					switch(s->max_level) {
-						case 3:
-							drawImage(getSprite(RING_2), s->x - 100 / 2, s->y - 100 / 2);
-						case 2:
-							drawImage(getSprite(RING_1), s->x - 80 / 2, s->y - 80 / 2);
-					}
-					break;
-				case 2:
-					drawImage(s->sprite, s->x - 80 / 2, s->y - 80 / 2);
-					switch(s->max_level) {
-						case 3:
-							drawImage(getSprite(RING_2), s->x - 100 / 2, s->y - 100 / 2);
-					}
-					break;
-				case 3:
-					drawImage(s->sprite, s->x - 100 / 2, s->y - 100 / 2);
-					break;
-			}
-			if(s->health < HEALTH_MAX) {
-				/* health bar */
-				drawImage(sprite[HEALTH_BAR_HOLLOW].image, s->x - 11, s->y + SUN_IMG_L / 2 + 5);
-				for(i = 0; 5 * i < s->health; i++) {
-					drawImage(sprite[HEALTH_BAR_SMALL].image, s->x - 10 + i, s->y + SUN_IMG_L / 2 + 6);
-				}
-				if(s->upgrade) {
-					/* upgrade bar */
-					drawImage(sprite[UPGRADE_BAR_HOLLOW].image, s->x - 11, s->y + SUN_IMG_L / 2 + 11);
-					for(i = 0; 5 * i < s->upgrade; i++) {
-						drawImage(s->bar_small, s->x - 10 + i, s->y + SUN_IMG_L / 2 + 12);
-					}
+		int upgrade_bar_offset = 0;
+		/* draw rings */
+		for(i = s->max_level; i > 1; i--) {
+			filledEllipseRGBA(game.screen, 
+				s->x, 
+				s->y, 
+				sun_radii[i], 
+				sun_radii[i], 
+				127, 
+				127, 
+				127, 
+				255);
+			filledEllipseRGBA(game.screen, 
+				s->x, 
+				s->y, 
+				0.93 * sun_radii[i], 
+				0.93 * sun_radii[i], 
+				0, 
+				0, 
+				0, 
+				255);
+		}
+		/* draw sun */
+		filledEllipseRGBA(game.screen, 
+			s->x, 
+			s->y, 
+			sun_radii[s->curr_level], 
+			sun_radii[s->curr_level], 
+			(sun_rgb[(s->color + 1)/ 2] >> 16) & 0xff, 
+			(sun_rgb[(s->color + 1)/ 2] >> 8) & 0xff, 
+			(sun_rgb[(s->color + 1)/ 2] >> 0) & 0xff, 
+			255);
+		/* draw status bars */
+		if((s->health > 0) && (s->health < HEALTH_MAX)) { /* health bar */
+			upgrade_bar_offset = 2 * BAR_SMALL_H;
+			/* hollow health box */
+			boxRGBA(game.screen, 
+				s->x - HOLLOW_BAR_WIDTH / 2 - 2, 
+				s->y + STATUS_BAR_Y_OFFSET, 
+				s->x + HOLLOW_BAR_WIDTH / 2 + 2, 
+				s->y + STATUS_BAR_Y_OFFSET + 2 * BAR_SMALL_H, 
+				255, 
+				255, 
+				255, 
+				255);
+			boxRGBA(game.screen, 
+				s->x - HOLLOW_BAR_WIDTH / 2, 
+				s->y + STATUS_BAR_Y_OFFSET + 1, 
+				s->x + HOLLOW_BAR_WIDTH / 2, 
+				s->y + STATUS_BAR_Y_OFFSET + 2 * BAR_SMALL_H - 1, 
+				0, 
+				0, 
+				0, 
+				255);
+			if(s->color % 2) {
+				for(i = 0; 2 * i < s->health; i++) {
+					rectangleRGBA(game.screen, 
+						s->x - HOLLOW_BAR_WIDTH / 2 + i, 
+						s->y + STATUS_BAR_Y_OFFSET + 1, 
+						s->x - HOLLOW_BAR_WIDTH / 2 + i + BAR_SMALL_W, 
+						s->y + STATUS_BAR_Y_OFFSET + 2 * BAR_SMALL_H - 1, 
+						255, 
+						0, 
+						0, 
+						255);					
 				}
 			}
 			else {
-				if(s->upgrade) {
-					/* upgrade bar only */
-					drawImage(sprite[UPGRADE_BAR_HOLLOW].image, s->x - 11, s->y + SUN_IMG_L / 2 + 5);
-					for(i = 0; 5 * i < s->upgrade; i++) {
-						drawImage(s->bar_small, s->x - 10 + i, s->y + SUN_IMG_L / 2 + 6);
-					}
+				for(i = 0; 2 * i < s->health; i++) {
+					rectangleRGBA(game.screen, 
+						s->x - HOLLOW_BAR_WIDTH / 2 + i, 
+						s->y + STATUS_BAR_Y_OFFSET + 1, 
+						s->x - HOLLOW_BAR_WIDTH / 2 + i + BAR_SMALL_W, 
+						s->y + STATUS_BAR_Y_OFFSET + 2 * BAR_SMALL_H - 1, 
+						(dot_rgb[(s->color + 1) / 2] >> 16) & 0xff, 
+						(dot_rgb[(s->color + 1) / 2] >> 8) & 0xff, 
+						(dot_rgb[(s->color + 1) / 2] >> 0) & 0xff, 
+						255);					
 				}
 			}
 		}
-		else {
-			drawImage(s->sprite, s->x - 50 / 2, s->y - 50 / 2);
-			switch(s->max_level) {
-				case 3:
-					drawImage(getSprite(RING_2), s->x - 100 / 2, s->y - 100 / 2);
-				case 2:
-					drawImage(getSprite(RING_1), s->x - 80 / 2, s->y - 80 / 2);
-			}
-			drawImage(sprite[HEALTH_BAR_HOLLOW].image, s->x - 11, s->y + SUN_IMG_L / 2 + 5);
-			for(i = 0; 5 * i < s->health; i++) {
-				drawImage(s->bar_small, s->x - 10 + i, s->y + SUN_IMG_L / 2 + 6);
+		if(s->upgrade) { /* upgrade bar */
+			/* hollow upgrade box */
+			boxRGBA(game.screen, 
+				s->x - HOLLOW_BAR_WIDTH / 2 - 2, 
+				s->y + STATUS_BAR_Y_OFFSET + upgrade_bar_offset, 
+				s->x + HOLLOW_BAR_WIDTH / 2 + 2, 
+				s->y + STATUS_BAR_Y_OFFSET + 2 * BAR_SMALL_H + upgrade_bar_offset, 
+				255, 
+				255, 
+				255, 
+				255);
+			boxRGBA(game.screen, 
+				s->x - HOLLOW_BAR_WIDTH / 2, 
+				s->y + STATUS_BAR_Y_OFFSET + upgrade_bar_offset + 1, 
+				s->x + HOLLOW_BAR_WIDTH / 2, 
+				s->y + STATUS_BAR_Y_OFFSET + 2 * BAR_SMALL_H + upgrade_bar_offset - 1, 
+				0, 
+				0, 
+				0, 
+				255);
+			for(i = 0; 2 * i < s->upgrade; i++) {
+				rectangleRGBA(game.screen, 
+					s->x - HOLLOW_BAR_WIDTH / 2 + i, 
+					s->y + STATUS_BAR_Y_OFFSET + upgrade_bar_offset + 1, 
+					s->x - HOLLOW_BAR_WIDTH / 2 + i + BAR_SMALL_W, 
+					s->y + STATUS_BAR_Y_OFFSET + 2 * BAR_SMALL_H + upgrade_bar_offset  - 1, 
+					(dot_rgb[(s->color + 1)/ 2] >> 16) & 0xff, 
+					(dot_rgb[(s->color + 1)/ 2] >> 8) & 0xff, 
+					(dot_rgb[(s->color + 1)/ 2] >> 0) & 0xff, 
+					255);
 			}
 		}
-		/*
-		printf("draw a sun here\n");
-		*/
 		s = s->next;
 	}
-	/*
-	printf("drew suns\n");
-	*/
 	/* Draw all dots */
 	for(i = 0; i < SCREEN_HEIGHT / GRID_ROW_WIDTH; i++) {
 		for(j = 0; j < SCREEN_WIDTH / GRID_COL_WIDTH; j++) {
 			for(k = 0; k < NO_OF_COLORS / 2; k++) {
 				d = dot_ptr_grid[i][j][k];
 				while(d) {
-					drawImage(d->sprite, d->x - DOT_IMG_W / 2, d->y - DOT_IMG_L / 2);
-					/*
-					printf("%d draw dot here\n", d->color);
-					*/
+					filledEllipseRGBA(game.screen, 
+						d->x, 
+						d->y, 
+						DOT_RADIUS, 
+						DOT_RADIUS, 
+						(dot_rgb[(d->color + 1)/ 2] >> 16) & 0xff, 
+						(dot_rgb[(d->color + 1)/ 2] >> 8) & 0xff, 
+						(dot_rgb[(d->color + 1)/ 2] >> 0) & 0xff, 
+						255);				
 					d = d->next;
 				}
 			}
 		}
 	}
-	/* Draw select_ring if active */
-	if(select_ring.active) {
-		/* image size of select ring must be 2 * ANNULUS_OUTER_RADIUS X 2 * ANNULUS_OUTER_RADIUS */
-		drawImage(select_ring.sprite, select_ring.x - ANNULUS_OUTER_RADIUS, select_ring.y - ANNULUS_OUTER_RADIUS);
-	}
-	/*
-	printf("drew dots\n");
-	printf("draw entities out\n");
-	*/
 }
 
