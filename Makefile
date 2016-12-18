@@ -26,7 +26,7 @@ clean:
 	rm $(PROG) *.o src/*~ *~
 
 install:
-	sudo apt-get install libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
+	sudo apt-get install gnuplot libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
 
 count_lines:
 	wc -l src/*.c src/*.h
