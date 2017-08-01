@@ -1,6 +1,0 @@
-number of suns (int N)
-char P (polar coordinates from centre) or R (rectangular coordinates from top-left corner)
-if Polar,
-	specify x_offset, y_offset (of polar origin from centre of screen)
-color	radius	theta(in degrees)	curr_level	max_level 	(N such rows for N suns)
-followed by an N X N binary adjacency matrix of edges between suns along which CPU dots can move
